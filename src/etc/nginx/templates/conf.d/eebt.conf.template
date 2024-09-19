@@ -1,0 +1,18 @@
+# EEBT - used in location_common.conf.template for Content Security Policy header
+
+map $upstream_http_content_security_policy $csp_value_map {
+    "~."          "$upstream_http_content_security_policy";
+    default       "${CSP}";
+}
+
+map ${OVERRIDE_UPSTREAM_CSP} $csp_value {
+    "true"        "${CSP}";
+    default       "$csp_value_map";
+}
+
+# EEBT - used in location_common.conf.template for status show on error page
+
+map $status $status_filtered {
+    default $status;
+    '418'   '403';
+}

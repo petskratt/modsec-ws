@@ -1,0 +1,22 @@
+# Once we are at it... let's send the data also to Sumologic
+services:
+  sumologic:
+    image: sumologic/collector:latest
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    deploy:
+      mode: global
+    environment:
+      SUMO_ACCESS_ID: ${SUMO_ACCESS_ID}
+      SUMO_ACCESS_KEY: ${SUMO_ACCESS_KEY}
+    networks:
+      - isolated
+      - public
+
+networks:
+  isolated:
+    driver: bridge
+    internal: true
+  public:
+    driver: bridge

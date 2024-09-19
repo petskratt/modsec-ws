@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>[ Error {status} ]</title>
+    <style>
+        * {
+            font-family: monospace;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f2f8ff;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        #app div:first-child {
+            font-size: 128px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2196f3;
+        }
+
+        #app .message {
+            font-size: 50px;
+            color: #333;
+        }
+
+        #app .cta {
+            font-size: 1.8rem;
+            line-height: 1.5;
+            color: #666;
+        }
+
+    </style>
+</head>
+
+<body>
+<div id="app">
+    <div>{status}</div>
+    <div >
+        <p class="message">Unexpected action detected!</p>
+        <p class="cta">Please contact our hj&auml;lp desk with request id:<br>
+        <strong>{request_id}</strong>
+        </p>
+    </div>
+</div>
+</body>
+
+</html>

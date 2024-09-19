@@ -1,0 +1,43 @@
+# EEBT - add CSP
+
+proxy_hide_header Content-Security-Policy;
+add_header Content-Security-Policy $csp_value always;
+
+# EEBT - define custom error pages
+
+error_page 403 =418 /error.html;
+error_page 500 502 503 504 /error.html;
+
+# WIP - would prefer using named locations... but
+# error_page 403 =418 @error_page;
+# recursive_error_pages on;
+
+# EEBT - serve custom error pages
+
+#location @error_page {
+location /error.html {
+	root /usr/share/nginx/html;
+	index error.html;
+    # do not run Modsecurity on recursive_error_pages - but that disables also auditlog...
+    # modsecurity_rules 'SecRuleEngine Off';
+    # customise error page content
+	sub_filter '{request_id}' $request_id;
+	sub_filter '{status}' $status_filtered;
+	sub_filter_once off;
+}
+
+# original location_common.conf.template
+
+location /healthz {
+    access_log off;
+    add_header Content-Type text/plain;
+    return 200 "OK";
+}
+
+location /metrics/nginx {
+    access_log off;
+    allow ${METRICS_ALLOW_FROM};
+    deny ${METRICS_DENY_FROM};
+    proxy_store off;
+    stub_status;
+}

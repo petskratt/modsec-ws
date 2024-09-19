@@ -1,0 +1,68 @@
+name: bsides-ws
+
+include:
+  # Elastic and Kibana - you will presumably run it somewhere else, but for demo / local play
+  - docker-compose-elastic.yaml
+  # Sumologic - once we are playing with logs let's send them everywhere (what could possibly go wrong)
+  - docker-compose-sumologic.yaml
+  -
+services:
+
+  # Your web app behind WAF
+  web:
+    container_name: web
+#    image: nginxdemos/nginx-hello
+    image: petskratt/burn-after-running
+    restart: always
+    depends_on:
+      - modsec
+    networks:
+      - isolated
+
+  # Modsecurity reverse-proxy & WAF
+  modsec:
+    container_name: modsec
+    image: owasp/modsecurity-crs:${MODSECURITY_TAG}
+    restart: always
+    volumes:
+      - ./src/html:/usr/share/nginx/html
+      - ./src/etc/nginx/templates/conf.d/eebt.conf.template:/etc/nginx/templates/conf.d/eebt.conf.template
+      - ./src/etc/nginx/templates/conf.d/logging.conf.template:/etc/nginx/templates/conf.d/logging.conf.template
+      - ./src/etc/nginx/templates/includes/location_common.conf.template:/etc/nginx/templates/includes/location_common.conf.template
+      - ./src/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf:/opt/owasp-crs/rules/REQUEST-900-EXCLUSION-RULES-BEFORE-CRS.conf
+      - ./src/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf:/opt/owasp-crs/rules/RESPONSE-999-EXCLUSION-RULES-AFTER-CRS.conf
+    env_file: modsec.env
+    ports:
+      - "80:8080"
+      - "443:8443"
+    logging:
+      driver: fluentd
+    depends_on:
+      - fluentbit
+    networks:
+      - isolated
+      - public
+
+  # this is the Fluent Bit that sends the logs to Elastic
+  fluentbit:
+    image: cr.fluentbit.io/fluent/fluent-bit
+    restart: always
+    volumes:
+      - ./fluent-bit.conf:/fluent-bit/etc/fluent-bit.conf
+    #      - ./fluent-bit-parsers.conf:/fluent-bit/etc/fluent-bit-parsers.conf
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    depends_on:
+      es01:
+        condition: service_healthy
+    networks:
+      - isolated
+      - public
+
+networks:
+  isolated:
+    driver: bridge
+    internal: true
+  public:
+    driver: bridge
