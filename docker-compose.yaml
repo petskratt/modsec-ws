@@ -4,8 +4,8 @@ include:
   # Elastic and Kibana - you will presumably run it somewhere else, but for demo / local play
   - docker-compose-elastic.yaml
   # Sumologic - once we are playing with logs let's send them everywhere (what could possibly go wrong)
-  - docker-compose-sumologic.yaml
-  -
+  #- docker-compose-sumologic.yaml
+
 services:
 
   # Your web app behind WAF
